@@ -1,6 +1,6 @@
 # Objective
 
-Design and set up a Virtual Private Cloud (VPC) with both public and private subnets using Terraform. 
+Design and set up a Virtual Private Cloud (VPC) using Terraform with public and private subnets. 
 Implement routing, security groups, and network access control lists (NACLs) to ensure proper communication and security within the VPC. Deploy an Ubuntu EC2 instance in each subnet in the AWS EU-West-1 (Ireland) region. 
 Create separate child modules for resources and reference them in the root module for readability and re-usability of the code. 
 Write a script to install Nginx on the EC2 instance in the public subnet upon deployment. 
@@ -17,8 +17,7 @@ Clean up resources on completion using `terraform destroy`.
 
 - Ensure Terraform and AWS CLI are installed.
 - Configure AWS CLI with IAM user credentials:
-  ```sh
-  aws configure
+   aws configure
 
 
 ## STEP 2: Create the Project Directory
