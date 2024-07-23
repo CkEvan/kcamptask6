@@ -273,7 +273,11 @@ sudo apt-get install -y PostgreSQL
 
 
 ## Cleanup
+
+```
 terraform destroy 
+```
+
 ![image](https://github.com/user-attachments/assets/f7ce1265-f84f-4686-ba3d-8674b3aba305)
 
 ![image](https://github.com/user-attachments/assets/04912913-a6d1-4fa4-809c-0b4009c74736)
