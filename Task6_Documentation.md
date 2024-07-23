@@ -20,6 +20,50 @@ Create a VPC:
 Name: KCVPC
 IPv4 CIDR block: 10.0.0.0/16
 Script: kcvpc.tf
+Image: task6_Images/kcvpcimage1.png
+
+STEP 4: Subnets
+Script: kcvpc.tf
+Image: task6_Images/privatesubnet.png
+
+resource "aws_subnet" "PublicSubnet" {
+  vpc_id            = aws_vpc.KCVPC.id
+  cidr_block        = var.public_subnet_cidr
+  availability_zone = var.availability_zone
+  tags = {
+    Name = "PublicSubnet"
+  }
+}
+
+resource "aws_subnet" "PrivateSubnet" {
+  vpc_id            = aws_vpc.KCVPC.id
+  cidr_block        = var.private_subnet_cidr
+  availability_zone = var.availability_zone
+  tags = {
+    Name = "PrivateSubnet"
+  }
+}
+
+STEP 5:  Internet Gateway (IGW)
+Script: kcvpc.tf
+Image: task6_Images/igw.png
 
 
+STEP 6: Route Tables
+Script: kcvpc.tf
+Image: task6_Images/routetables.png
 
+STEP 7: NAT Gateway
+Script: kcvpc.tf
+Image: task6_Images/NAT.png
+
+STEP 8: Security Groups
+Script: kcvpc.tf
+Image: task6_Images/sgimage.png
+
+STEP 9: Network ACLs
+Script: kcvpc.tf
+Image: task6_Images/nacls.png
+
+# Deploy Instances
+STEP 10: 
