@@ -9,17 +9,19 @@ Clean up resources on completion using `terraform destroy`.
 
 
 # Prerequisites
+```
 - Download and install Terraform.
 - Download and install the AWS CLI.
 - Create an IAM user and generate access keys for that IAM user.
-  
+ ``` 
 
 ## STEP 1: Set Up The Environment
 
 - Ensure Terraform and AWS CLI are installed.
 - Configure AWS CLI with IAM user credentials:
-   aws configure
-
+```
+   aws configure  
+```
 
 ## STEP 2: Create the Project Directory
 Create a directory for your Terraform project and navigate into it (kcamptask6):
@@ -264,6 +266,14 @@ sudo apt-get install -y nginx
 sudo apt-get update
 sudo apt-get install -y PostgreSQL
 ```
+
+## STEP 13: Terraform Commands
+```
+terraform init [downloads necessary plugins and modules. It sets up the working directory for subsequent Terraform commands like plan and apply]
+terraform plan [This command displays actions your script will be executing. It also alerts you to any errors in the script. In this task, I made corrections more than 10 times till I could fix the script]
+terraform apply [Once your script is error-free, terraform will apply the instructions your script set it out to do]
+```
+
 
 ![image](https://github.com/user-attachments/assets/5962029a-bd65-4d05-bafa-4dd4ae35ff9f)
 
