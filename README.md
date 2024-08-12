@@ -1,11 +1,10 @@
-# Objective
+# Terraform Task
 
-Design and set up a Virtual Private Cloud (VPC) using Terraform with public and private subnets. 
-Implement routing, security groups, and network access control lists (NACLs) to ensure proper communication and security within the VPC. Deploy an Ubuntu EC2 instance in each subnet in the AWS EU-West-1 (Ireland) region. 
-Create separate child modules for resources and reference them in the root module for readability and re-usability of the code. 
-Write a script to install Nginx on the EC2 instance in the public subnet on deployment. 
-Write a script to install PostgreSQL on the EC2 instance in the public subnet on deployment. 
-Clean up resources on completion using `terraform destroy`.
+1. Using Terraform, design and set up a Virtual Private Cloud (VPC) with both public and private subnets. Implement routing, security groups, and network access control lists (NACLs) to ensure proper communication and security within the VPC and an Ubuntu EC2 instance in each subnet. Work in the AWS EU-West-1 (Ireland) region.
+2. Create separate child modules for your resources and reference them in your root module for readability and re-usability of your code.
+3. Write a script to install Nginx on your EC2 instance in the public subnet on deployment
+4. Write a script to install PostgreSQL on your EC2 instance in the public subnet on deployment
+5. Clean up resource on completion using terraform destroy
 
 
 # Prerequisites
@@ -22,6 +21,7 @@ Clean up resources on completion using `terraform destroy`.
 ```
    aws configure  
 ```
+Image Confiimage
 
 ## STEP 2: Create the Project Directory
 Create a directory for your Terraform project and navigate into it (kcamptask6):
@@ -34,38 +34,38 @@ cd kcamptask6
 ## STEP 3: Create a VPC
 
 ```
-resource "aws_vpc" "KCVPC" {
-  cidr_block = "10.0.0.0/16"
-  tags = {
-    Name = "KCVPC"
-  }
-}
+VPC Name: KCVPC
+IPv4 CIDR block: 10.0.0.0/16
 ```
 
-Script: https://github.com/CkEvan/kcamptask6/blob/d6aec266c071851ca517733f5cd228e2a52a02fa/kcvpc.tf
 
 ![image](https://github.com/user-attachments/assets/26999743-92b3-4d68-933f-d26fd747935e)
 
 
 
 ## STEP 4: Subnets
-Script: https://github.com/CkEvan/kcamptask6/blob/d6aec266c071851ca517733f5cd228e2a52a02fa/kcvpc.tf
+Create a Pulic Subnet with IPv4 (10.0.1.0/24)
+Create Private Subnet using IPv4 (10.0.2.0/24)
+Select any AZ from your region
+Select any AZ from your region (preferably the same as the Public Subnet for simplicity)
 
 ```
 resource "aws_subnet" "PublicSubnet" {
-  vpc_id            = aws_vpc.KCVPC.id
-  cidr_block        = var.public_subnet_cidr
-  availability_zone = var.availability_zone
+  vpc_id     = aws_vpc.KCVPC.id
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "eu-west-1a"
+  map_public_ip_on_launch = true
   tags = {
     Name = "PublicSubnet"
   }
 }
 
 resource "aws_subnet" "PrivateSubnet" {
-  vpc_id            = aws_vpc.KCVPC.id
-  cidr_block        = var.private_subnet_cidr
-  availability_zone = var.availability_zone
-  tags = {
+  vpc_id     = aws_vpc.KCVPC.id
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "eu-west-1a"
+  map_public_ip_on_launch = false
+   tags = {
     Name = "PrivateSubnet"
   }
 }
@@ -76,14 +76,14 @@ resource "aws_subnet" "PrivateSubnet" {
 
 
 ## STEP 5: Internet Gateway (IGW)
-- Script: `kcvpc.tf`
-
+Create and attach an IGW to KCVPC.
 
 ```  
-resource "aws_internet_gateway" "igw" {
+resource "aws_internet_gateway" "IGW" {
   vpc_id = aws_vpc.KCVPC.id
+
   tags = {
-    Name = "InternetGateway"
+    Name = "IGW"
   }
 }
 ```
@@ -93,31 +93,48 @@ resource "aws_internet_gateway" "igw" {
 
 
 ## STEP 6: Route Tables
-- Script: `kcvpc.tf`
+Create Public and Private Route Tables
+Associate PublicSubnet with Public route table
+Associate PrivateSubnet with Private route table.
+Ensure no direct route to the internet.
 
 ```
 resource "aws_route_table" "PublicRouteTable" {
   vpc_id = aws_vpc.KCVPC.id
+
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
+    gateway_id = aws_internet_gateway.IGW.id
   }
+
   tags = {
     Name = "PublicRouteTable"
   }
 }
 
-resource "aws_route_table_association" "PublicSubnetAssociation" {
+resource "aws_route_table_association" "PublicSubnetRouteTable" {
   subnet_id      = aws_subnet.PublicSubnet.id
   route_table_id = aws_route_table.PublicRouteTable.id
 }
 
 resource "aws_route_table" "PrivateRouteTable" {
   vpc_id = aws_vpc.KCVPC.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.NAT_IGW.id
+  }
+
   tags = {
     Name = "PrivateRouteTable"
   }
 }
+
+resource "aws_route_table_association" "PrivateSubnetRouteTable" {
+  subnet_id      = aws_subnet.PrivateSubnet.id
+  route_table_id = aws_route_table.PrivateRouteTable.id
+}
+
 ```
 
 ![image](https://github.com/user-attachments/assets/fc1c388d-819b-465e-bb83-7d8bb00889df)
@@ -125,19 +142,21 @@ resource "aws_route_table" "PrivateRouteTable" {
 
 
 ## STEP 7: NAT Gateway
-- Script: `kcvpc.tf`
+Create a NAT Gateway in the PublicSubnet.
+Allocate an Elastic IP for the NAT Gateway.
+Update the PrivateRouteTable to route internet traffic (0.0.0.0/0) to the NAT Gateway.
 
 ```
-resource "aws_eip" "NAT" {
-  domain = "vpc"
+resource "aws_eip" "NAT_eip" {
+  domain   = "vpc"
 }
 
-
-resource "aws_nat_gateway" "NAT" {
-  allocation_id = aws_eip.NAT.id
+resource "aws_nat_gateway" "NAT_IGW" {
+  allocation_id = aws_eip.NAT_eip.id
   subnet_id     = aws_subnet.PublicSubnet.id
+  connectivity_type = "public"
   tags = {
-    Name = "NatGateway"
+    Name = "NAT_IGW"
   }
 }
 ```
@@ -147,58 +166,78 @@ resource "aws_nat_gateway" "NAT" {
 
 
 ## STEP 8: Security Groups
-- Script: `kcvpc.tf`
+Create a Security Group for public instances 
+Allow inbound HTTP (port 80) and HTTPS (port 443) traffic from anywhere (0.0.0.0/0).
+Allow inbound SSH (port 22) traffic from a specific IP 
+Allow all outbound traffic.
+Create a Security Group for private instances 
+Allow inbound traffic from the PublicSubnet on required ports 
+Allow all outbound traffic.
 
 ```
 resource "aws_security_group" "PublicSG" {
-  vpc_id = aws_vpc.KCVPC.id
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["102.88.70.158/32"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  vpc_id      = aws_vpc.KCVPC.id
+
   tags = {
-    Name = "PublicSecurityGroup"
+    Name = "PublicSG"
   }
 }
 
+resource "aws_vpc_security_group_ingress_rule" "https" {
+  security_group_id = aws_security_group.PublicSG.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 443
+  ip_protocol       = "tcp"
+  to_port           = 443
+}
+
+resource "aws_vpc_security_group_ingress_rule" "http" {
+  security_group_id = aws_security_group.PublicSG.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 80
+  ip_protocol       = "tcp"
+  to_port           = 80
+}
+
+resource "aws_vpc_security_group_ingress_rule" "ssh" {
+  security_group_id = aws_security_group.PublicSG.id
+  cidr_ipv4         = "102.89.33.223/32"
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic" {
+  security_group_id = aws_security_group.PublicSG.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"  
+  from_port         = 0
+  to_port           = 0
+}
+
 resource "aws_security_group" "PrivateSG" {
-  vpc_id = aws_vpc.KCVPC.id
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = [aws_subnet.PublicSubnet.cidr_block]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  vpc_id      = aws_vpc.KCVPC.id
+
   tags = {
-    Name = "PrivateSecurityGroup"
+    Name = "PrivateSG"
   }
 }
+
+resource "aws_vpc_security_group_ingress_rule" "PostgreSQL" {
+  security_group_id = aws_security_group.PublicSG.id
+  cidr_ipv4         = "10.0.1.0/24"
+  from_port         = 5432
+  ip_protocol       = "tcp"
+  to_port           = 5432
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic" {
+  security_group_id = aws_security_group.PrivateSG.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1" 
+  from_port         = 0
+  to_port           = 0
+}  
 ```
 
 ![image](https://github.com/user-attachments/assets/e94cd797-e29d-434d-bf40-d8c2c779cc81)
@@ -206,14 +245,96 @@ resource "aws_security_group" "PrivateSG" {
 
 
 ## STEP 9: Network ACLs
-- Script: `kcvpc.tf`
+Configure NACLs for additional security on both subnets.
+Public Subnet NACL: Allow inbound HTTP, HTTPS, and SSH traffic. Allow outbound traffic.
+Private Subnet NACL: Allow inbound traffic from the public subnet. Allow outbound traffic to the public subnet and internet.
 
 ```
-resource "aws_network_acl" "PublicNACL" {
+resource "aws_network_acl" "NACL_Public" {
   vpc_id = aws_vpc.KCVPC.id
-  tags = {
-    Name = "PublicNACL"
+
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 80
+    to_port    = 80
   }
+
+ingress {
+    protocol   = "tcp"
+    rule_no    = 101
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 443
+    to_port    = 443
+  }
+
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 102
+    action     = "allow"
+    cidr_block = "102.89.33.223/32"
+    from_port  = 22
+    to_port    = 22
+  }
+
+  egress {
+    protocol   = -1
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  tags = {
+    Name = "NACL_Public"
+  }
+}
+
+resource "aws_network_acl_association" "NACL_PublicAssociate" {
+  network_acl_id = aws_network_acl.NACL_Public.id
+  subnet_id      = aws_subnet.PublicSubnet.id
+}
+
+resource "aws_network_acl" "NACL_Private" {
+  vpc_id = aws_vpc.KCVPC.id
+
+  ingress {
+    protocol   = "-1"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "10.0.1.0/24"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  egress {
+    protocol   = -1
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "10.0.1.0/24"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  tags = {
+    Name = "NACL_Private"
+  }
+}
+
+resource "aws_network_acl_association" "NACL_PrivateAssociate" {
+  network_acl_id = aws_network_acl.NACL_Private.id
+  subnet_id      = aws_subnet.PrivateSubnet.id
+}
+```
+Creating Local SSH-KEY
+```
+resource "aws_key_pair" "task6sshkey" {
+  key_name   = "task6sshkey"
+  public_key = file("task6sshkey.pub")
 }
 ```
 
@@ -222,56 +343,99 @@ resource "aws_network_acl" "PublicNACL" {
 
 
 ## STEP 10: Deploy 2 EC2 Instances on Each Subnet
-- Script: `kcec2.tf`
+Launch an EC2 instance in the PublicSubnet:
+Use the public security group.
+Verify that the instance can be accessed via the internet.
+Launch an EC2 instance in the PrivateSubnet:
+Use the private security group.
+Verify that the instance can access the internet through the NAT Gateway and can communicate with the public instance.
 
 ```
-resource "aws_instance" "PublicInstance" {
-  ami           = var.ami_id
-  instance_type = "t2.micro"
-  subnet_id     = aws_subnet.PublicSubnet.id
-  tags = {
-    Name = "PublicInstance"
+# Launch an EC2 instance in the PublicSubnet:
+resource "aws_instance" "Public_Instance" {
+  ami               = "ami-0c38b837cd80f13bb"
+  instance_type     = "t2.micro"
+  availability_zone = "eu-west-1a"
+  key_name          = aws_key_pair.task6sshkey.id
+  subnet_id         = aws_subnet.PublicSubnet.id
+  security_groups   = aws_security_group.PublicSG.id
+  associate_public_ip_address = true
+
+  root_block_device {
+    volume_type           = "gp3"
+    volume_size           = 20
+    delete_on_termination = true
   }
+
+  tags = {
+    Name = "Public_Instance"
+    description = "webserver"
+  }
+
+user_data = <<-EOF
+                #!/bin/bash
+
+                #installing nginx webserver 
+                sudo apt update -y
+                sudo apt install nginx -y
+                sudo systemctl start nginx -y
+                sudo systemctl enable nginx
+
+                #install postgresql-client
+                sudo apt update -y
+                sudo apt install postgresql-client -y
+                  
+                EOF
 }
 
-resource "aws_instance" "PrivateInstance" {
-  ami           = var.ami_id
-  instance_type = "t2.micro"
-  subnet_id     = aws_subnet.PrivateSubnet.id
-  tags = {
-    Name = "PrivateInstance"
+
+# Launch an EC2 instance in the PrivateSubnet:
+resource "aws_instance" "Private_Instance" {
+  ami               = "ami-0c38b837cd80f13bb"
+  instance_type     = "t2.micro"
+  availability_zone = "eu-west-1a"
+  key_name          = aws_key_pair.task6sshkey.id
+  subnet_id         = aws_subnet.PrivateSubnet.id
+  security_groups   = aws_security_group.PrivateSG.id
+  associate_public_ip_address = true
+
+  root_block_device {
+    volume_type           = "gp3"
+    volume_size           = 20
+    delete_on_termination = true
   }
+
+  tags = {
+    Name = "Private_Instance"
+    description = "database"
+  }
+  user_data = <<-EOF
+                #!/bin/bash
+                sudo apt-get update -y
+                sudo apt-get install -y postgresql postgresql-contrib
+                sudo systemctl start postgresql
+                sudo systemctl enable postgresql
+                sudo -u postgres psql -c "CREATE USER admin WITH PASSWORD 'kcec2@123#';"
+                sudo -u postgres psql -c "CREATE DATABASE kcdata OWNER admin;"
+                sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE kcdata TO admin;"
+                sudo sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/*/main/postgresql.conf
+                echo "host    all             all             0.0.0.0/0               md5" | sudo tee -a /etc/postgresql/*/main/pg_hba.conf
+                sudo systemctl restart postgresql
+                sudo ufw allow 5432/tcp
+                EOF
 }
+
 ```
 
 ![image](https://github.com/user-attachments/assets/afa4bee4-adc8-404e-9a5f-4d6a1a916da9)
 
 
-
-## STEP 11: Script to Install Nginx on EC2 Instance in the Public Subnet on Deployment
-- Script: [kcec2.tf](kcec2.tf)
-
-```
-#!/bin/bash
-sudo apt-get update
-sudo apt-get install -y nginx
-```
-
-
-## STEP 12: Script to Install PostgreSQL on EC2 Instance in the Public Subnet on Deployment
-- Script: [kcec2.tf](kcec2.tf)
-
-```
-#!/bin/bash
-sudo apt-get update
-sudo apt-get install -y PostgreSQL
-```
-
 ## STEP 13: Terraform Commands
 ```
-terraform init [downloads necessary plugins and modules. It sets up the working directory for subsequent Terraform commands like plan and apply]
-terraform plan [This command displays actions your script will be executing. It also alerts you to any errors in the script. In this task, I made corrections more than 10 times till I could fix the script]
-terraform apply [Once your script is error-free, terraform will apply the instructions your script set it out to do]
+terraform init 
+terraform validate
+terraform plan 
+terraform apply 
 ```
 
 
@@ -293,7 +457,13 @@ terraform destroy
 ![image](https://github.com/user-attachments/assets/04912913-a6d1-4fa4-809c-0b4009c74736)
 
 
-NOTE: Please this documentation contains a snippet of the main script and screenshots of the activities on this task, to view the entire script please refer to the first script at https://github.com/CkEvan/kcamptask6/blob/d6aec266c071851ca517733f5cd228e2a52a02fa/kcvpc.tf and second script at https://github.com/CkEvan/kcamptask6/blob/d6aec266c071851ca517733f5cd228e2a52a02fa/kcec2.tf . As for the images please check https://github.com/CkEvan/kcamptask6/tree/d6aec266c071851ca517733f5cd228e2a52a02fa/task6_Images
+Attached: 
+terraform.tf
+modules
+script
+output.tf
+variables
+task6_images
 
 Thank you. 
 
