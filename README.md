@@ -1,10 +1,10 @@
 # Terraform Task
 
-1. Using Terraform, design and set up a Virtual Private Cloud (VPC) with both public and private subnets. Implement routing, security groups, and network access control lists (NACLs) to ensure proper communication and security within the VPC and an Ubuntu EC2 instance in each subnet. Work in the AWS EU-West-1 (Ireland) region.
+1. Using Terraform, design and set up a Virtual Private Cloud (VPC) with public and private subnets. Implement routing, security groups, and network access control lists (NACLs) to ensure proper communication and security within the VPC and an Ubuntu EC2 instance in each subnet. Work in the AWS EU-West-1 (Ireland) region.
 2. Create separate child modules for your resources and reference them in your root module for readability and re-usability of your code.
 3. Write a script to install Nginx on your EC2 instance in the public subnet on deployment
 4. Write a script to install PostgreSQL on your EC2 instance in the public subnet on deployment
-5. Clean up resource on completion using terraform destroy
+5. Clean up resources on completion using terraform destroy
 
 
 # Prerequisites
@@ -21,7 +21,8 @@
 ```
    aws configure  
 ```
-Image Confiimage
+![image](https://github.com/user-attachments/assets/23098b57-e757-4b20-99e0-a2592a14b6b7)
+
 
 ## STEP 2: Create the Project Directory
 Create a directory for your Terraform project and navigate into it (kcamptask6):
@@ -37,6 +38,7 @@ cd kcamptask6
 VPC Name: KCVPC
 IPv4 CIDR block: 10.0.0.0/16
 ```
+![image](https://github.com/user-attachments/assets/f147894f-b22a-411c-89f1-0db0af70f0f7)
 
 
 ![image](https://github.com/user-attachments/assets/26999743-92b3-4d68-933f-d26fd747935e)
@@ -162,6 +164,7 @@ resource "aws_nat_gateway" "NAT_IGW" {
 ```
 
 ![image](https://github.com/user-attachments/assets/724164d0-e7f7-453f-aad0-6c0d7ce339dd)
+![image](https://github.com/user-attachments/assets/77bae851-cc24-4459-bfae-67b79c64bc6f)
 
 
 
@@ -438,6 +441,10 @@ terraform plan
 terraform apply 
 ```
 
+![image](https://github.com/user-attachments/assets/6d83d6f2-5eac-4676-85b0-6e8fab4764f6)
+
+![image](https://github.com/user-attachments/assets/0e83e137-d8ee-4774-9f02-e6da04d46c02)
+
 
 ![image](https://github.com/user-attachments/assets/5962029a-bd65-4d05-bafa-4dd4ae35ff9f)
 
@@ -464,6 +471,10 @@ script
 output.tf
 variables
 task6_images
+![image](https://github.com/user-attachments/assets/dfb47091-679c-4df9-9968-06eb88d16c66)
+![image](https://github.com/user-attachments/assets/5d204005-2d0c-4447-9872-fb769f830d94)
+![image](https://github.com/user-attachments/assets/4656e5e2-f950-429d-bac5-cc7bc92e62b4)
+
 
 Thank you. 
 
