@@ -447,8 +447,6 @@ terraform apply
 ![image](https://github.com/user-attachments/assets/0e83e137-d8ee-4774-9f02-e6da04d46c02)
 
 
-![image](https://github.com/user-attachments/assets/5962029a-bd65-4d05-bafa-4dd4ae35ff9f)
-
 ![image](https://github.com/user-attachments/assets/778ffc0e-d4a1-498e-883e-f42e260bb2e6)
 
 
