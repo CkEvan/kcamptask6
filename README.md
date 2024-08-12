@@ -41,9 +41,6 @@ IPv4 CIDR block: 10.0.0.0/16
 ![image](https://github.com/user-attachments/assets/f147894f-b22a-411c-89f1-0db0af70f0f7)
 
 
-![image](https://github.com/user-attachments/assets/26999743-92b3-4d68-933f-d26fd747935e)
-
-
 
 ## STEP 4: Subnets
 Create a Pulic Subnet with IPv4 (10.0.1.0/24)
@@ -73,7 +70,8 @@ resource "aws_subnet" "PrivateSubnet" {
 }
 ```
 
-![image](https://github.com/user-attachments/assets/d364fd1b-1faa-48f6-aee7-c991b78a2673)
+![image](https://github.com/user-attachments/assets/6af78893-d2e8-430f-9839-8771b7676740)
+
 
 
 
@@ -90,7 +88,8 @@ resource "aws_internet_gateway" "IGW" {
 }
 ```
 
-![image](https://github.com/user-attachments/assets/ddf2b231-9bac-4c1e-b421-8c18fd07620a)
+![image](https://github.com/user-attachments/assets/717963f3-bdcd-42c9-bd28-232ee7d4db3b)
+
 
 
 
@@ -139,7 +138,8 @@ resource "aws_route_table_association" "PrivateSubnetRouteTable" {
 
 ```
 
-![image](https://github.com/user-attachments/assets/fc1c388d-819b-465e-bb83-7d8bb00889df)
+![image](https://github.com/user-attachments/assets/ddbe52ae-26aa-4749-8571-6ffe38825c7d)
+
 
 
 
@@ -163,8 +163,11 @@ resource "aws_nat_gateway" "NAT_IGW" {
 }
 ```
 
-![image](https://github.com/user-attachments/assets/724164d0-e7f7-453f-aad0-6c0d7ce339dd)
-![image](https://github.com/user-attachments/assets/77bae851-cc24-4459-bfae-67b79c64bc6f)
+![image](https://github.com/user-attachments/assets/e6e6c5f4-5364-4eda-aced-75a29d6ac38b)
+
+
+![image](https://github.com/user-attachments/assets/2516f294-9e8e-4297-9f37-31a6a3ef7f47)
+
 
 
 
@@ -242,7 +245,8 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic" {
   to_port           = 0
 }  
 ```
-![image](https://github.com/user-attachments/assets/86c056e6-d801-4303-8ea7-f7f13ac8050c)
+![image](https://github.com/user-attachments/assets/ca2b4832-9bc3-4d7f-8c5d-fbea1595c9b1)
+
 
 
 
@@ -342,7 +346,9 @@ resource "aws_key_pair" "task6sshkey" {
 }
 ```
 
-![image](https://github.com/user-attachments/assets/bdb2a6cb-62d0-4455-acca-8b7958cfeb81)
+![image](https://github.com/user-attachments/assets/dcb7ed55-1729-43ac-84e1-7c4be56a74b7)
+
+
 
 
 
