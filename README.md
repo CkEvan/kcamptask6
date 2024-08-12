@@ -440,8 +440,9 @@ terraform validate
 terraform plan 
 terraform apply 
 ```
+![image](https://github.com/user-attachments/assets/7c3e7187-e594-4022-9d3f-3469ecc9a88b)
 
-![image](https://github.com/user-attachments/assets/6d83d6f2-5eac-4676-85b0-6e8fab4764f6)
+
 
 ![image](https://github.com/user-attachments/assets/0e83e137-d8ee-4774-9f02-e6da04d46c02)
 
