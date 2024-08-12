@@ -242,8 +242,9 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic" {
   to_port           = 0
 }  
 ```
+![image](https://github.com/user-attachments/assets/86c056e6-d801-4303-8ea7-f7f13ac8050c)
 
-![image](https://github.com/user-attachments/assets/e94cd797-e29d-434d-bf40-d8c2c779cc81)
+
 
 
 
@@ -430,7 +431,8 @@ resource "aws_instance" "Private_Instance" {
 
 ```
 
-![image](https://github.com/user-attachments/assets/afa4bee4-adc8-404e-9a5f-4d6a1a916da9)
+![image](https://github.com/user-attachments/assets/e3cd998a-f1f4-4a80-bf59-3b60e16b7ecd)
+
 
 
 ## STEP 13: Terraform Commands
